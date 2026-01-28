@@ -23,23 +23,43 @@ const CDN_DIR = join(__dirname, '../cdn')
 
 /**
  * react-icons family configurations
+ *
+ * License notes:
+ * - MIT, ISC, Apache-2.0: Include license file
+ * - CC BY 4.0 (Font Awesome): Attribution required but flexible - include license file
+ * - CC0: Public domain, no requirements
  */
 const FAMILIES = {
+  // Core families (most popular, permissive licenses)
   lu: { package: 'react-icons/lu', prefix: 'Lu', displayName: 'Lucide', license: 'ISC' },
   hi: { package: 'react-icons/hi', prefix: 'Hi', displayName: 'Heroicons', license: 'MIT' },
   hi2: { package: 'react-icons/hi2', prefix: 'Hi', displayName: 'Heroicons 2', license: 'MIT' },
-  pi: { package: 'react-icons/pi', prefix: 'Pi', displayName: 'Phosphor', license: 'MIT' },
-  tb: { package: 'react-icons/tb', prefix: 'Tb', displayName: 'Tabler', license: 'MIT' },
   fi: { package: 'react-icons/fi', prefix: 'Fi', displayName: 'Feather', license: 'MIT' },
+
+  // Font Awesome (CC BY 4.0 for icons - attribution required)
+  fa: { package: 'react-icons/fa', prefix: 'Fa', displayName: 'Font Awesome 5', license: 'CC-BY-4.0' },
+  fa6: { package: 'react-icons/fa6', prefix: 'Fa', displayName: 'Font Awesome 6', license: 'CC-BY-4.0' },
+
+  // Additional popular families
   bs: { package: 'react-icons/bs', prefix: 'Bs', displayName: 'Bootstrap', license: 'MIT' },
   md: { package: 'react-icons/md', prefix: 'Md', displayName: 'Material Design', license: 'Apache-2.0' },
   ai: { package: 'react-icons/ai', prefix: 'Ai', displayName: 'Ant Design', license: 'MIT' },
   ri: { package: 'react-icons/ri', prefix: 'Ri', displayName: 'Remix', license: 'Apache-2.0' },
-  si: { package: 'react-icons/si', prefix: 'Si', displayName: 'Simple Icons', license: 'CC0-1.0' }
+  si: { package: 'react-icons/si', prefix: 'Si', displayName: 'Simple Icons', license: 'CC0-1.0' },
+
+  // Large families (excluded from defaults due to size)
+  pi: { package: 'react-icons/pi', prefix: 'Pi', displayName: 'Phosphor', license: 'MIT' },
+  tb: { package: 'react-icons/tb', prefix: 'Tb', displayName: 'Tabler', license: 'MIT' },
+  gi: { package: 'react-icons/gi', prefix: 'Gi', displayName: 'Game Icons', license: 'CC-BY-3.0' },
+
+  // Specialized families
+  vsc: { package: 'react-icons/vsc', prefix: 'Vsc', displayName: 'VS Code', license: 'MIT' },
+  wi: { package: 'react-icons/wi', prefix: 'Wi', displayName: 'Weather', license: 'MIT' }
 }
 
-// Default families (permissive licenses, reasonable size)
-const DEFAULT_FAMILIES = ['lu', 'hi', 'hi2', 'fi', 'pi', 'tb', 'bs']
+// Default families for CDN (migration-friendly set)
+// Excludes very large families (pi, tb, gi) to keep CDN size reasonable
+const DEFAULT_FAMILIES = ['lu', 'hi', 'hi2', 'fi', 'fa6', 'bs', 'md', 'ai', 'ri', 'si']
 
 /**
  * SVG attributes that should remain camelCase
