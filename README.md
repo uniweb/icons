@@ -6,8 +6,8 @@ Icon library for Uniweb sites. Provides lazily loaded SVG icons from popular ico
 
 - **Local resolution**: Faster than CDN for included icon families
 - **Tree-shakeable**: Import only the icons you use
-- **CDN fallback**: Automatically falls back to CDN for non-local icons
-- **16+ icon families**: Lucide, Heroicons, Phosphor, Tabler, Feather, and more
+- **CDN fallback**: Automatically falls back to GitHub Pages CDN
+- **Permissive licenses**: All included icons use MIT, ISC, or similar licenses
 
 ## Installation
 
@@ -19,7 +19,9 @@ pnpm add @uniweb/icons
 
 ### With Uniweb Runtime
 
-The icons are automatically available when using `![](lucide:home)` syntax in markdown. For local resolution (faster than CDN), configure the runtime to use the local resolver:
+Icons are automatically available when using `![](lucide:home)` syntax in markdown. The runtime fetches icons from the CDN by default.
+
+For local resolution (faster, offline-capable), configure the runtime:
 
 ```js
 import { createLocalResolver } from '@uniweb/icons/resolver'
@@ -37,70 +39,80 @@ import homeSvg from '@uniweb/icons/families/lu/home.js'
 // homeSvg is the SVG string: '<svg xmlns="http://www.w3.org/2000/svg" ...>...</svg>'
 ```
 
-## Supported Families
+## Included Families (npm package)
 
-| Friendly Name | Code | Package |
-|--------------|------|---------|
-| `lucide` | `lu` | Lucide Icons |
-| `heroicons` | `hi` | Heroicons v1 |
-| `heroicons2` | `hi2` | Heroicons v2 |
-| `phosphor` | `pi` | Phosphor Icons |
-| `tabler` | `tb` | Tabler Icons |
-| `feather` | `fi` | Feather Icons |
-| `fa` | `fa` | Font Awesome 5 |
-| `fa6` | `fa6` | Font Awesome 6 |
-| `bootstrap` | `bs` | Bootstrap Icons |
-| `material-design` | `md` | Material Design |
-| `ant-design` | `ai` | Ant Design Icons |
-| `remix` | `ri` | Remix Icons |
-| `simple-icons` | `si` | Simple Icons |
-| `vscode` | `vsc` | VS Code Icons |
-| `weather` | `wi` | Weather Icons |
-| `game` | `gi` | Game Icons |
+These families are included in the npm package for local resolution:
+
+| Family | Code | Icons | License |
+|--------|------|-------|---------|
+| [Lucide](https://lucide.dev) | `lu` | 1,541 | ISC |
+| [Heroicons](https://heroicons.com) v1 | `hi` | 460 | MIT |
+| [Heroicons](https://heroicons.com) v2 | `hi2` | 972 | MIT |
+| [Feather](https://feathericons.com) | `fi` | 287 | MIT |
+
+## CDN-Only Families
+
+These families are available via CDN but not included in the npm package (to reduce size):
+
+| Family | Code | License | Notes |
+|--------|------|---------|-------|
+| [Phosphor](https://phosphoricons.com) | `pi` | MIT | Large set (9k+ icons) |
+| [Tabler](https://tabler-icons.io) | `tb` | MIT | Large set (5k+ icons) |
+| [Bootstrap](https://icons.getbootstrap.com) | `bs` | MIT | |
+| [Material Design](https://fonts.google.com/icons) | `md` | Apache-2.0 | |
+| [Ant Design](https://ant.design/components/icon) | `ai` | MIT | |
+| [Remix](https://remixicon.com) | `ri` | Apache-2.0 | |
+| [Simple Icons](https://simpleicons.org) | `si` | CC0-1.0 | Brand logos |
+
+## CDN
+
+Icons are served from GitHub Pages:
+
+```
+https://uniweb.github.io/icons/{family}/{family}-{name}.svg
+```
+
+Example: `lucide:home` → `https://uniweb.github.io/icons/lu/lu-home.svg`
+
+### Custom CDN
+
+To use a different CDN:
+
+```yaml
+# site.yml
+icons:
+  cdnUrl: https://your-cdn.com/icons
+```
+
+## Licensing
+
+This package redistributes icons from upstream projects. Each icon family retains its original license:
+
+- **ISC**: Lucide (see [licenses/lucide.md](licenses/lucide.md))
+- **MIT**: Heroicons, Feather (see [licenses/](licenses/))
+
+All included families use permissive licenses (MIT, ISC, Apache-2.0, CC0) that allow redistribution with attribution. See the `licenses/` directory for full license texts.
+
+**Note**: Some icon families available via CDN (Font Awesome, VS Code Icons, Game Icons) use CC BY licenses that require attribution. If you use these families, ensure proper attribution in your project.
 
 ## Development
 
-### Converting Icons
-
-Icons are converted from `react-icons` to individual ES modules:
+### Converting Icons (for npm package)
 
 ```bash
-# Install dependencies
 pnpm install
-
-# Convert default families (lu, hi, hi2, pi, tb, fi)
-pnpm convert
-
-# Convert all families
-pnpm convert:all
-
-# Convert specific families
-node scripts/convert.js lu hi
+pnpm convert           # Default families
+pnpm convert:all       # All families
 ```
 
-### Output Structure
+### Building CDN
 
-```
-src/families/
-├── lu/
-│   ├── home.js          # export default '<svg>...</svg>'
-│   ├── arrow-right.js
-│   └── ...
-├── hi/
-│   └── ...
-└── ...
+```bash
+node scripts/build-cdn.js    # Build SVG files for CDN deployment
 ```
 
-## CDN Fallback
-
-When an icon isn't available locally, the resolver falls back to the Uniweb icons CDN:
-
-```
-https://icons.uniweb.app/{familyCode}/{familyCode}-{iconName}.svg
-```
-
-Example: `lucide:home` → `https://icons.uniweb.app/lu/lu-home.svg`
+The GitHub Actions workflow automatically builds and deploys to GitHub Pages on tagged releases.
 
 ## License
 
-MIT
+This package's code is MIT licensed. Icon assets retain their original licenses (see above).

@@ -59,12 +59,12 @@ export const SUPPORTED_FAMILIES = ['lu', 'hi', 'hi2', 'fi']
  * Create a local icon resolver
  *
  * @param {Object} options
- * @param {string} [options.cdnBase='https://icons.uniweb.app'] - CDN fallback URL
+ * @param {string} [options.cdnBase='https://uniweb.github.io/icons'] - CDN fallback URL
  * @param {boolean} [options.useCdn=true] - Whether to fall back to CDN
  * @returns {Function} Resolver: (library, name) => Promise<string|null>
  */
 export function createLocalResolver(options = {}) {
-  const { cdnBase = 'https://icons.uniweb.app', useCdn = true } = options
+  const { cdnBase = 'https://uniweb.github.io/icons', useCdn = true } = options
 
   // Cache resolved icons
   const cache = new Map()
