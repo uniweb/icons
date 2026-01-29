@@ -38,6 +38,8 @@ const FAMILIES = {
   ai: { package: 'react-icons/ai', prefix: 'Ai', displayName: 'Ant Design' },
   ri: { package: 'react-icons/ri', prefix: 'Ri', displayName: 'Remix' },
   si: { package: 'react-icons/si', prefix: 'Si', displayName: 'Simple Icons' },
+  io5: { package: 'react-icons/io5', prefix: 'Io', displayName: 'Ionicons 5' },
+  bi: { package: 'react-icons/bi', prefix: 'Bi', displayName: 'Boxicons' },
   vsc: { package: 'react-icons/vsc', prefix: 'Vsc', displayName: 'VS Code' },
   wi: { package: 'react-icons/wi', prefix: 'Wi', displayName: 'Weather' },
   gi: { package: 'react-icons/gi', prefix: 'Gi', displayName: 'Game' }

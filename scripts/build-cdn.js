@@ -46,6 +46,8 @@ const FAMILIES = {
   ai: { package: 'react-icons/ai', prefix: 'Ai', displayName: 'Ant Design', license: 'MIT' },
   ri: { package: 'react-icons/ri', prefix: 'Ri', displayName: 'Remix', license: 'Apache-2.0' },
   si: { package: 'react-icons/si', prefix: 'Si', displayName: 'Simple Icons', license: 'CC0-1.0' },
+  io5: { package: 'react-icons/io5', prefix: 'Io', displayName: 'Ionicons 5', license: 'MIT' },
+  bi: { package: 'react-icons/bi', prefix: 'Bi', displayName: 'Boxicons', license: 'MIT' },
 
   // Large families (excluded from defaults due to size)
   pi: { package: 'react-icons/pi', prefix: 'Pi', displayName: 'Phosphor', license: 'MIT' },
@@ -59,7 +61,7 @@ const FAMILIES = {
 
 // Default families for CDN (migration-friendly set)
 // Excludes very large families (pi, tb, gi) to keep CDN size reasonable
-const DEFAULT_FAMILIES = ['lu', 'hi', 'hi2', 'fi', 'fa6', 'bs', 'md', 'ai', 'ri', 'si']
+const DEFAULT_FAMILIES = ['lu', 'hi', 'hi2', 'fi', 'fa6', 'bs', 'md', 'ai', 'ri', 'si', 'io5', 'bi']
 
 /**
  * SVG attributes that should remain camelCase

@@ -15,6 +15,8 @@ This package includes icons from multiple open-source icon libraries. Each famil
 | Ant Design | `ai` | MIT | No (include license) |
 | Remix | `ri` | Apache 2.0 | No (include license) |
 | Simple Icons | `si` | CC0 | No (public domain) |
+| Ionicons | `io5` | MIT | No (include license) |
+| Boxicons | `bi` | MIT | No (include license) |
 
 ## For Site Owners
 
@@ -50,6 +52,8 @@ See the `licenses/` directory for complete license texts:
 - [Ant Design](./licenses/ant-design.md) - MIT
 - [Remix](./licenses/remix.md) - Apache 2.0
 - [Simple Icons](./licenses/simple-icons.md) - CC0
+- [Ionicons](./licenses/ionicons.md) - MIT
+- [Boxicons](./licenses/boxicons.md) - MIT
 
 ## Sources
 
@@ -62,3 +66,5 @@ See the `licenses/` directory for complete license texts:
 - Ant Design: https://ant.design/components/icon
 - Remix Icons: https://remixicon.com
 - Simple Icons: https://simpleicons.org
+- Ionicons: https://ionic.io/ionicons
+- Boxicons: https://boxicons.com
