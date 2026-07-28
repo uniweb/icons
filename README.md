@@ -139,14 +139,15 @@ npm publish --access public
 ```
 
 Pushing a `v*` tag runs the **Deploy Icons to GitHub Pages** workflow, which
-rebuilds `cdn/` and uploads it.
+rebuilds `cdn/` and publishes it. That is the only thing that updates the CDN —
+merging to `main` does not, so an icon family added without a release stays
+unpublished until one is cut.
 
-> **The tag-triggered deploy does not currently complete.** The `github-pages`
-> environment allows deployments only from `main`, so a tag run builds the artifact
-> and is then rejected at the deploy step (`Tag "vX.Y.Z" is not allowed to deploy to
-> github-pages due to environment protection rules`). Until that policy accepts `v*`
-> tags, publish the CDN by running the same workflow manually from the Actions tab
-> (`workflow_dispatch`, on `main`) after pushing the tag.
+> The `github-pages` environment must permit deployments from `v*` **tags**, not
+> only from `main`. Without that rule a tag run builds the artifact and is then
+> rejected at the deploy step (`Tag "vX.Y.Z" is not allowed to deploy to
+> github-pages due to environment protection rules`), which fails quietly enough
+> to go unnoticed — the build is green and only the deploy job is red.
 
 ## License
 
