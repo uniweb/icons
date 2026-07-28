@@ -39,6 +39,18 @@ import homeSvg from '@uniweb/icons/families/lu/home.js'
 // homeSvg is the SVG string: '<svg xmlns="http://www.w3.org/2000/svg" ...>...</svg>'
 ```
 
+Each family also ships a manifest listing the icon ids it contains — enough to build
+a picker or validate a name without loading any SVG payloads:
+
+```js
+import { family, names } from '@uniweb/icons/families/lu'
+// family = 'lu', names = ['a-arrow-down', 'a-arrow-up', …]
+```
+
+The manifest is names only, not a barrel of re-exports: most ids (`a-arrow-down`)
+aren't valid JS identifiers, and every icon module is a default export. Load icons
+through the per-icon path above or through the resolver.
+
 ## Included Families (npm package)
 
 These families are included in the npm package for local resolution:
@@ -105,13 +117,36 @@ pnpm convert           # Default families
 pnpm convert:all       # All families
 ```
 
-### Building CDN
+### Building the CDN
 
 ```bash
-node scripts/build-cdn.js    # Build SVG files for CDN deployment
+node scripts/build-cdn.js    # Build SVG files into cdn/
 ```
 
-The GitHub Actions workflow automatically builds and deploys to GitHub Pages on tagged releases.
+### Releasing
+
+**One version number covers both artifacts.** The npm package and the CDN release
+from the same tag, so `package.json`, the git tag, and the published package always
+agree. Don't tag the CDN independently — a tag that doesn't match `package.json`
+looks like a package version and isn't one.
+
+```bash
+# 1. bump the version in package.json, commit
+# 2. tag that commit and push both
+git tag v0.1.1 && git push && git push --tags
+# 3. publish to npm
+npm publish --access public
+```
+
+Pushing a `v*` tag runs the **Deploy Icons to GitHub Pages** workflow, which
+rebuilds `cdn/` and uploads it.
+
+> **The tag-triggered deploy does not currently complete.** The `github-pages`
+> environment allows deployments only from `main`, so a tag run builds the artifact
+> and is then rejected at the deploy step (`Tag "vX.Y.Z" is not allowed to deploy to
+> github-pages due to environment protection rules`). Until that policy accepts `v*`
+> tags, publish the CDN by running the same workflow manually from the Actions tab
+> (`workflow_dispatch`, on `main`) after pushing the tag.
 
 ## License
 
