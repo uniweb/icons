@@ -22,6 +22,19 @@ This package includes icons from multiple open-source icon libraries. Each famil
 | Game Icons | `gi` | CC BY 3.0 | **Yes** (see below) |
 | VS Code Icons | `vsc` | CC BY 4.0 | **Yes** (see below) |
 | Weather Icons | `wi` | SIL OFL 1.1 | **Yes** — font licence (see below) |
+| css.gg | `cg` | MIT | No (include license) |
+| Circum Icons | `ci` | **MPL 2.0** | No — but copyleft on modified files (see below) |
+| Devicons | `di` | MIT | No (include license) |
+| Flat Color Icons | `fc` | MIT | No (include license) |
+| Github Octicons | `go` | MIT | No (include license) |
+| Grommet Icons | `gr` | Apache 2.0 | No (include license) |
+| IcoMoon Free | `im` | CC BY 4.0 | **Yes** (see below) |
+| Ionicons 4 | `io` | MIT | No (include license) |
+| Line Awesome | `lia` | MIT | No (include license) |
+| Radix Icons | `rx` | MIT | No (include license) |
+| Simple Line Icons | `sl` | MIT | No (include license) |
+| Themify Icons | `tfi` | MIT | No (include license) |
+| Typicons | `ti` | **CC BY-SA 3.0** | **Yes — and SHARE-ALIKE** (see below) |
 
 > **Corrected 2026-07-29.** `vsc` and `wi` were previously declared MIT. Both are wrong:
 > VS Code Icons are CC BY 4.0 and Weather Icons are SIL OFL 1.1, and **both require
@@ -49,6 +62,20 @@ author; game-icons.net lists them per icon, and CC BY asks for the author where 
 **Weather Icons (SIL OFL 1.1):** A font licence, so the rules differ from the CC/MIT families:
 the icons may be used and redistributed freely, but the **Reserved Font Name** may not be used
 for a modified version, and derivatives must stay under OFL. Include the licence text.
+
+**IcoMoon Free (CC BY 4.0):** Attribution required, same shape as Font Awesome. Upstream offers
+GPL as an alternative; this package treats it as CC BY 4.0, the option that imposes no copyleft
+on your site.
+
+**Typicons (CC BY-SA 3.0) — the strictest family here.** Attribution **and share-alike**: if you
+modify the icon artwork, that artwork must be released under CC BY-SA 3.0 too. Using an icon
+unmodified in a page does **not** make your page a derivative; editing the artwork does make
+that artwork share-alike. If that's unacceptable for your project, avoid `ti` rather than
+work around it.
+
+**Circum Icons (MPL 2.0) — the only copyleft licence here.** File-level, so using an icon as-is
+triggers nothing, but a **modified** icon file stays MPL-2.0 and its source must be available to
+recipients. Do not treat a modified Circum icon as if it were MIT.
 
 **Material Design (Apache 2.0):** Google says attribution is "appreciated but not required."
 
@@ -78,6 +105,19 @@ See the `licenses/` directory for complete license texts:
 - [Game Icons](./licenses/game-icons.md) - CC BY 3.0
 - [VS Code Icons](./licenses/vscode.md) - CC BY 4.0
 - [Weather Icons](./licenses/weather.md) - SIL OFL 1.1
+- [css.gg](./licenses/css-gg.md) - MIT
+- [Circum Icons](./licenses/circum-icons.md) - MPL 2.0
+- [Devicons](./licenses/devicons.md) - MIT
+- [Flat Color Icons](./licenses/flat-color-icons.md) - MIT
+- [Github Octicons](./licenses/octicons.md) - MIT
+- [Grommet Icons](./licenses/grommet.md) - Apache 2.0
+- [IcoMoon Free](./licenses/icomoon-free.md) - CC BY 4.0
+- [Ionicons 4](./licenses/ionicons4.md) - MIT
+- [Line Awesome](./licenses/line-awesome.md) - MIT
+- [Radix Icons](./licenses/radix.md) - MIT
+- [Simple Line Icons](./licenses/simple-line-icons.md) - MIT
+- [Themify Icons](./licenses/themify.md) - MIT
+- [Typicons](./licenses/typicons.md) - CC BY-SA 3.0
 
 ## Sources
 
@@ -97,3 +137,16 @@ See the `licenses/` directory for complete license texts:
 - Game Icons: https://game-icons.net
 - VS Code Icons: https://github.com/microsoft/vscode-codicons
 - Weather Icons: https://erikflowers.github.io/weather-icons/
+- css.gg: https://css.gg
+- Circum Icons: https://circumicons.com
+- Devicons: https://vorillaz.github.io/devicons/
+- Flat Color Icons: https://github.com/icons8/flat-color-icons
+- Github Octicons: https://primer.style/octicons/
+- Grommet Icons: https://icons.grommet.io
+- IcoMoon Free: https://github.com/Keyamoon/IcoMoon-Free
+- Ionicons 4: https://ionic.io/ionicons
+- Line Awesome: https://icons8.com/line-awesome
+- Radix Icons: https://icons.radix-ui.com
+- Simple Line Icons: https://thesabbir.github.io/simple-line-icons/
+- Themify Icons: https://themify.me/themify-icons
+- Typicons: http://s-ings.com/typicons/

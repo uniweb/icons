@@ -59,7 +59,26 @@ const FAMILIES = {
   // require more than MIT does. Licences here are the upstream ones as listed
   // by react-icons' own README table; do not fill this column from memory.
   vsc: { package: 'react-icons/vsc', prefix: 'Vsc', displayName: 'VS Code', license: 'CC-BY-4.0' },
-  wi: { package: 'react-icons/wi', prefix: 'Wi', displayName: 'Weather', license: 'OFL-1.1' }
+  wi: { package: 'react-icons/wi', prefix: 'Wi', displayName: 'Weather', license: 'OFL-1.1' },
+
+  // Remaining react-icons packs. Every `prefix` below was read off the real
+  // exports rather than inferred from the family code — `im` and `lia` both
+  // sort `Im500Px` / `Lia500Px` first, so a rule derived from the first export
+  // name yields `Im500`/`Lia500` and matches exactly one icon. A wrong prefix
+  // here does not error; it silently builds an empty family.
+  cg: { package: 'react-icons/cg', prefix: 'Cg', displayName: 'css.gg', license: 'MIT' },
+  ci: { package: 'react-icons/ci', prefix: 'Ci', displayName: 'Circum Icons', license: 'MPL-2.0' },
+  di: { package: 'react-icons/di', prefix: 'Di', displayName: 'Devicons', license: 'MIT' },
+  fc: { package: 'react-icons/fc', prefix: 'Fc', displayName: 'Flat Color Icons', license: 'MIT' },
+  go: { package: 'react-icons/go', prefix: 'Go', displayName: 'Github Octicons', license: 'MIT' },
+  gr: { package: 'react-icons/gr', prefix: 'Gr', displayName: 'Grommet Icons', license: 'Apache-2.0' },
+  im: { package: 'react-icons/im', prefix: 'Im', displayName: 'IcoMoon Free', license: 'CC-BY-4.0' },
+  io: { package: 'react-icons/io', prefix: 'Io', displayName: 'Ionicons 4', license: 'MIT' },
+  lia: { package: 'react-icons/lia', prefix: 'Lia', displayName: 'Line Awesome', license: 'MIT' },
+  rx: { package: 'react-icons/rx', prefix: 'Rx', displayName: 'Radix Icons', license: 'MIT' },
+  sl: { package: 'react-icons/sl', prefix: 'Sl', displayName: 'Simple Line Icons', license: 'MIT' },
+  tfi: { package: 'react-icons/tfi', prefix: 'Tfi', displayName: 'Themify Icons', license: 'MIT' },
+  ti: { package: 'react-icons/ti', prefix: 'Ti', displayName: 'Typicons', license: 'CC-BY-SA-3.0' }
 }
 
 // Default families for CDN (migration-friendly set)
