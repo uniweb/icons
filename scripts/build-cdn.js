@@ -55,8 +55,11 @@ const FAMILIES = {
   gi: { package: 'react-icons/gi', prefix: 'Gi', displayName: 'Game Icons', license: 'CC-BY-3.0' },
 
   // Specialized families
-  vsc: { package: 'react-icons/vsc', prefix: 'Vsc', displayName: 'VS Code', license: 'MIT' },
-  wi: { package: 'react-icons/wi', prefix: 'Wi', displayName: 'Weather', license: 'MIT' }
+  // vsc and wi are NOT MIT — both were declared so until 2026-07-29, and both
+  // require more than MIT does. Licences here are the upstream ones as listed
+  // by react-icons' own README table; do not fill this column from memory.
+  vsc: { package: 'react-icons/vsc', prefix: 'Vsc', displayName: 'VS Code', license: 'CC-BY-4.0' },
+  wi: { package: 'react-icons/wi', prefix: 'Wi', displayName: 'Weather', license: 'OFL-1.1' }
 }
 
 // Default families for CDN (migration-friendly set)
