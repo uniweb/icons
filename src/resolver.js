@@ -3,7 +3,14 @@
  *
  * Provides fast, local icon resolution from this package.
  * Falls back to CDN if icon not found locally.
+ *
+ * The CDN origin and the corpus filename rule come from
+ * `@uniweb/core/icon-corpus` — the same module `scripts/build-cdn.js` writes
+ * those filenames with, and the same one `@uniweb/runtime` reads them with.
+ * Don't respell either here; a writer and its readers with separate copies is
+ * how one corpus ends up with two incompatible spellings.
  */
+import { DEFAULT_ICON_BASE, iconUrl } from '@uniweb/core/icon-corpus'
 
 /**
  * Map friendly family names to react-icons codes
@@ -59,12 +66,13 @@ export const SUPPORTED_FAMILIES = ['lu', 'hi', 'hi2', 'fi']
  * Create a local icon resolver
  *
  * @param {Object} options
- * @param {string} [options.cdnBase='https://uniweb.github.io/icons'] - CDN fallback URL
+ * @param {string} [options.cdnBase] - CDN fallback origin; defaults to the
+ *   framework's own published corpus (`DEFAULT_ICON_BASE`)
  * @param {boolean} [options.useCdn=true] - Whether to fall back to CDN
  * @returns {Function} Resolver: (library, name) => Promise<string|null>
  */
 export function createLocalResolver(options = {}) {
-  const { cdnBase = 'https://uniweb.github.io/icons', useCdn = true } = options
+  const { cdnBase = DEFAULT_ICON_BASE, useCdn = true } = options
 
   // Cache resolved icons
   const cache = new Map()
@@ -104,8 +112,7 @@ export function createLocalResolver(options = {}) {
     }
 
     try {
-      const iconFileName = `${familyCode}-${name}`
-      const url = `${cdnBase}/${familyCode}/${iconFileName}.svg`
+      const url = iconUrl(familyCode, name, cdnBase)
       const response = await fetch(url)
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const svg = await response.text()

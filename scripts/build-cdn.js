@@ -17,6 +17,11 @@ import { writeFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
+// ⛔ This script is the WRITER of the corpus layout; @uniweb/runtime and this
+// package's own resolver are its READERS. They share `iconPath` so the two
+// halves cannot drift — respelling `${family}-${name}.svg` here is how one
+// corpus acquires two incompatible spellings.
+import { iconPath } from '@uniweb/core/icon-corpus'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const CDN_DIR = join(__dirname, '../cdn')
@@ -192,9 +197,9 @@ async function buildFamily(familyCode) {
       }
 
       const iconName = toKebabCase(exportName, config.prefix)
-      // CDN naming: {family}-{name}.svg
-      const fileName = `${familyCode}-${iconName}.svg`
-      const filePath = join(outputDir, fileName)
+      // CDN layout: {family}/{family}-{name}.svg — from the shared helper, so
+      // what this writes is by construction what the resolvers request.
+      const filePath = join(CDN_DIR, iconPath(familyCode, iconName))
       await writeFile(filePath, svg)
 
       iconList.push(iconName)
