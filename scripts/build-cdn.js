@@ -87,19 +87,15 @@ const FAMILIES = {
   ti: { package: 'react-icons/ti', prefix: 'Ti', displayName: 'Typicons', license: 'CC-BY-SA-3.0' }
 }
 
-// Families published to the CDN.
+// Families published to the CDN — all of them.
 //
-// This is every family in FAMILIES except `ti`. It went from 12 to 30 on
-// 2026-08-20 [Diego]: the 12-family set was chosen on size grounds, and the
-// picker that consumes this corpus could reach only 45% of its records.
-//
-// ⛔ `ti` (Typicons) is held back DELIBERATELY and is the one entry to think
-// before adding. It is the only CC-BY-SA family here — share-alike, not just
-// attribution — and ATTRIBUTION.md calls it "the strictest family here". It is
-// 336 icons (0.7% of the full corpus), so excluding it costs almost nothing
-// while the obligation goes unanswered. Adding it back is a licensing decision,
-// not a coverage one.
-const DEFAULT_FAMILIES = Object.keys(FAMILIES).filter((f) => f !== 'ti')
+// Derived rather than listed, so adding a family to FAMILIES publishes it.
+// Went 12 → 30 → 31 on 2026-08-20: the 12-family set was a size decision that
+// left a consuming picker able to reach under half its records, and `ti` was
+// then held back for a licence reading that did not survive contact with the
+// licence (see ATTRIBUTION.md § Typicons — CC BY-SA reaches Adaptations, and a
+// format conversion that leaves the artwork untouched is not one).
+const DEFAULT_FAMILIES = Object.keys(FAMILIES)
 
 /**
  * SVG attributes that should remain camelCase

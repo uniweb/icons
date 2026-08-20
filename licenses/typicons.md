@@ -20,6 +20,14 @@ Copyright (c) Stephen Hutchings.
   contributions under **the same licence**. Using an icon unmodified in a page does not make
   your page a derivative; *editing the icon artwork* does make that artwork CC BY-SA.
 
+## The conversion in this package
+
+The Typicons SVG files here are a **format conversion** of the originals — path data and
+`viewBox` unchanged, nothing redrawn. Section 3 of CC BY-SA 3.0 covers modifications
+"technically necessary to exercise the rights in other media and formats" and does not treat
+them as an Adaptation. **Regardless, these SVG files are made available under CC BY-SA 3.0**,
+so the share-alike question needs no resolving.
+
 ## What attribution looks like
 
 ```

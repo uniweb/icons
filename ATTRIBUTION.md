@@ -2,6 +2,16 @@
 
 This package includes icons from multiple open-source icon libraries. Each family has its own license.
 
+## What we changed
+
+Attribution licences (CC BY, CC BY-SA) require indicating whether the work was modified.
+**For every family here the answer is the same: format only.**
+
+Icons are extracted from the [`react-icons`](https://github.com/react-icons/react-icons)
+distribution and serialized to standalone SVG files. Path data, `viewBox` and presentation
+attributes are carried through unchanged; no artwork is redrawn, recoloured or edited. The
+file naming (`{family}/{family}-{name}.svg`) is ours.
+
 ## Quick Reference
 
 | Family | Code | License | Attribution Required? |
@@ -67,11 +77,20 @@ for a modified version, and derivatives must stay under OFL. Include the licence
 GPL as an alternative; this package treats it as CC BY 4.0, the option that imposes no copyleft
 on your site.
 
-**Typicons (CC BY-SA 3.0) — the strictest family here.** Attribution **and share-alike**: if you
+**Typicons (CC BY-SA 3.0) — the only share-alike family.** Attribution **and share-alike**: if you
 modify the icon artwork, that artwork must be released under CC BY-SA 3.0 too. Using an icon
 unmodified in a page does **not** make your page a derivative; editing the artwork does make
-that artwork share-alike. If that's unacceptable for your project, avoid `ti` rather than
-work around it.
+that artwork share-alike.
+
+**To remove any doubt about the conversion below: the Typicons SVG files published in this
+package and on its CDN are made available under CC BY-SA 3.0**, the same licence as the
+originals. Section 3 of that licence grants "the right to make such modifications as are
+technically necessary to exercise the rights in other media and formats" and does not treat
+them as an Adaptation, so a format conversion that leaves the artwork untouched arguably
+creates nothing new to license — but stating it costs nothing and settles the question
+either way. Share-alike reaches **that artwork**, never a page that displays it, never the
+other families here, and never this package's own code (§4(a): a Collection is not itself
+subject to the licence).
 
 **Circum Icons (MPL 2.0) — the only copyleft licence here.** File-level, so using an icon as-is
 triggers nothing, but a **modified** icon file stays MPL-2.0 and its source must be available to

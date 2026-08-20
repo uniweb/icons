@@ -64,8 +64,8 @@ These families are included in the npm package for local resolution:
 
 ## CDN Families
 
-The CDN publishes **every family this package knows how to build except Typicons**
-— 30 families. The npm package still ships only the four above; the rest resolve
+The CDN publishes **every family this package knows how to build** — 31 families,
+~51k icons. The npm package still ships only the four above; the rest resolve
 over the CDN.
 
 Family lists go stale, so ask the corpus rather than this file:
@@ -76,10 +76,9 @@ curl -s https://uniweb.github.io/icons/metadata.json \
       print(d['generatedAt'], d.get('corpus', {}).get('reactIcons', '?'), len(f), sorted(f))"
 ```
 
-**Typicons (`ti`) is excluded deliberately.** It is the only CC BY-SA family here
-— share-alike, not merely attribution — and that obligation has not been
-answered. It is 336 icons, so excluding it costs little. Adding it back is a
-licensing decision, not a coverage one. See [ATTRIBUTION.md](ATTRIBUTION.md).
+Seven families carry terms beyond MIT/ISC and one, Typicons, is share-alike.
+All of them are documented in [ATTRIBUTION.md](ATTRIBUTION.md), which is
+published with the corpus.
 
 ## CDN
 
