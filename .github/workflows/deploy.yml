@@ -30,10 +30,21 @@ jobs:
         with:
           version: 9
 
+      # Node 24 is the ACTIVE LTS. Node 20 reached end-of-life 2026-04-30
+      # (nodejs/Release schedule.json), so this was building the published
+      # corpus on an unsupported runtime for ~4 months. `eb04c62` moved the
+      # actions onto their Node 24 runtimes and deliberately left the build
+      # here; this is the other half.
+      #
+      # ⚠️ This changes the `.tar.gz` bytes — a different zlib build deflates
+      # identical input differently — so `archives[].sha256` moves on the next
+      # publish while `contentSha256` does NOT. That is exactly the split
+      # `scripts/lib/tar.js` documents, and a mirror keying its re-stock on
+      # `contentSha256` should not re-download anything.
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
 
       # `@uniweb/core` is declared `workspace:^` because this package is
       # developed inside a pnpm workspace, where that spec resolves to the
