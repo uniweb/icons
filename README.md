@@ -149,6 +149,19 @@ unpublished until one is cut.
 > github-pages due to environment protection rules`), which fails quietly enough
 > to go unnoticed — the build is green and only the deploy job is red.
 
+> **CI resolves `@uniweb/core` from npm, on purpose.** That dependency is declared
+> `workspace:^`, which resolves only inside the pnpm workspace this package is
+> authored in; CI checks this repo out on its own, where pnpm refuses the spec
+> with `ERR_PNPM_WORKSPACE_PKG_NOT_FOUND` before the build runs. The workflow
+> therefore rewrites it to the published package (`npm pkg set
+> 'dependencies.@uniweb/core=latest'`) ahead of `pnpm install`. `package.json`
+> keeps `workspace:^` — the release tooling substitutes a real range at publish
+> time, so the tarball on npm carries an ordinary caret range.
+>
+> **Add another `@uniweb/*` dependency here and you must extend that step.** The
+> failure cannot be reproduced from a workspace checkout, where the same install
+> succeeds — it appears only in the runner, and only as a red deploy job.
+
 ## License
 
 This package's code is MIT licensed. Icon assets retain their original licenses (see above).
