@@ -35,8 +35,24 @@ jobs:
         with:
           node-version: '20'
 
+      # `@uniweb/core` is declared `workspace:^` because this package is
+      # developed inside a pnpm workspace, where that spec resolves to the
+      # sibling checkout and is substituted with a real range at publish time.
+      # CI clones this repo on its own, so there is no workspace to resolve
+      # against and `pnpm install` fails with ERR_PNPM_WORKSPACE_PKG_NOT_FOUND.
+      # The failure cannot be reproduced in a workspace checkout, where the
+      # same install succeeds — so it only ever shows up here.
+      #
+      # Rewrite the spec to the published package, for CI only. `latest` is the
+      # right target rather than a pinned range: build-cdn.js must write the
+      # corpus with the same `iconPath` the published resolvers read it with.
+      - name: Point workspace deps at their published versions
+        run: npm pkg set 'dependencies.@uniweb/core=latest'
+
+      # --no-frozen-lockfile: the step above intentionally edits package.json,
+      # so a lockfile committed later would otherwise be treated as stale.
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Generate SVG files for CDN
         run: node scripts/build-cdn.js
