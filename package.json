@@ -1,6 +1,6 @@
 {
   "name": "@uniweb/icons",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Icon library for Uniweb - lazily loaded SVG icons from popular icon sets",
   "type": "module",
   "exports": {
