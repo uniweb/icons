@@ -13,7 +13,7 @@
  *   node scripts/build-cdn.js lu hi        # Build specific families
  */
 
-import { writeFile, mkdir } from 'fs/promises'
+import { writeFile, mkdir, readFile, copyFile, cp } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -22,6 +22,7 @@ import { fileURLToPath } from 'url'
 // halves cannot drift — respelling `${family}-${name}.svg` here is how one
 // corpus acquires two incompatible spellings.
 import { iconPath } from '@uniweb/core/icon-corpus'
+import { buildSearchIndex } from './lib/search-index.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const CDN_DIR = join(__dirname, '../cdn')
@@ -86,9 +87,19 @@ const FAMILIES = {
   ti: { package: 'react-icons/ti', prefix: 'Ti', displayName: 'Typicons', license: 'CC-BY-SA-3.0' }
 }
 
-// Default families for CDN (migration-friendly set)
-// Excludes very large families (pi, tb, gi) to keep CDN size reasonable
-const DEFAULT_FAMILIES = ['lu', 'hi', 'hi2', 'fi', 'fa6', 'bs', 'md', 'ai', 'ri', 'si', 'io5', 'bi']
+// Families published to the CDN.
+//
+// This is every family in FAMILIES except `ti`. It went from 12 to 30 on
+// 2026-08-20 [Diego]: the 12-family set was chosen on size grounds, and the
+// picker that consumes this corpus could reach only 45% of its records.
+//
+// ⛔ `ti` (Typicons) is held back DELIBERATELY and is the one entry to think
+// before adding. It is the only CC-BY-SA family here — share-alike, not just
+// attribution — and ATTRIBUTION.md calls it "the strictest family here". It is
+// 336 icons (0.7% of the full corpus), so excluding it costs almost nothing
+// while the obligation goes unanswered. Adding it back is a licensing decision,
+// not a coverage one.
+const DEFAULT_FAMILIES = Object.keys(FAMILIES).filter((f) => f !== 'ti')
 
 /**
  * SVG attributes that should remain camelCase
@@ -202,7 +213,11 @@ async function buildFamily(familyCode) {
       const filePath = join(CDN_DIR, iconPath(familyCode, iconName))
       await writeFile(filePath, svg)
 
-      iconList.push(iconName)
+      // The react export name rides along: it is a real search surface in the
+      // index (frontend measured plain-name matching beating the legacy tag
+      // layer on `cart` and `team`), and collecting it here is what keeps the
+      // index a product of the SAME pass that wrote the bytes.
+      iconList.push({ name: iconName, react: exportName })
       success++
     } catch (err) {
       console.error(`  Failed: ${exportName}: ${err.message}`)
@@ -233,13 +248,24 @@ async function main() {
     await mkdir(CDN_DIR, { recursive: true })
   }
 
+  // The corpus is REBUILT WHOLE every publish from react-icons, so the version
+  // that produced it is part of what the corpus IS — a name that upstream
+  // retires disappears here on the next build. The dependency is pinned exactly
+  // (not a range) so this field is a guarantee rather than an observation of
+  // whatever the runner happened to resolve. See README § Releasing.
+  const reactIconsVersion = JSON.parse(
+    await readFile(new URL('../node_modules/react-icons/package.json', import.meta.url), 'utf8')
+  ).version
+
   const metadata = {
     generatedAt: new Date().toISOString(),
+    corpus: { reactIcons: reactIconsVersion },
     families: {}
   }
 
   let totalSuccess = 0
   let totalFailed = 0
+  const indexFamilies = {}
 
   for (const family of familiesToBuild) {
     const { success, failed, icons } = await buildFamily(family)
@@ -247,11 +273,20 @@ async function main() {
     totalFailed += failed
 
     if (FAMILIES[family]) {
+      indexFamilies[family] = {
+        displayName: FAMILIES[family].displayName,
+        license: FAMILIES[family].license,
+        icons
+      }
       metadata.families[family] = {
         displayName: FAMILIES[family].displayName,
         license: FAMILIES[family].license,
         count: icons.length,
-        icons
+        // Bare names, unchanged. metadata.json is a PUBLIC URL with consumers
+        // this repo cannot enumerate, so its shape is not ours to tidy; the
+        // richer records live in the search index beside it. Both come from
+        // this one loop — never a second pass over the corpus.
+        icons: icons.map((i) => i.name)
       }
     }
   }
@@ -261,6 +296,30 @@ async function main() {
     join(CDN_DIR, 'metadata.json'),
     JSON.stringify(metadata, null, 2)
   )
+
+  // Search index — root + one file per family, per
+  // `collab/context/icon-search-index-shape.md`.
+  const { root, perFamily } = buildSearchIndex({
+    families: indexFamilies,
+    generatedAt: metadata.generatedAt,
+    reactIcons: reactIconsVersion
+  })
+  await writeFile(join(CDN_DIR, 'index.json'), JSON.stringify(root))
+  for (const [code, doc] of perFamily) {
+    await writeFile(join(CDN_DIR, `${code}.json`), JSON.stringify(doc))
+  }
+  console.log(`Search index: ${Object.keys(root.terms).length} terms, ${perFamily.size} family files`)
+
+  // ⛔ Attribution travels WITH the corpus, not just with the repo.
+  //
+  // Several published families require attribution — `fa`/`fa6`/`vsc`/`im` are
+  // CC-BY-4.0, `gi` is CC-BY-3.0, `wi` is OFL-1.1, `ci` is MPL-2.0 — and until
+  // 2026-08-20 this script copied neither ATTRIBUTION.md nor licenses/ into the
+  // artifact. The analysis existed and was current; it simply was not served,
+  // so the corpus offered ~23k SVGs with nothing beside them. A licence file in
+  // a source repo is not attribution accompanying the bytes a CDN hands out.
+  await copyFile(join(__dirname, '../ATTRIBUTION.md'), join(CDN_DIR, 'ATTRIBUTION.md'))
+  await cp(join(__dirname, '../licenses'), join(CDN_DIR, 'licenses'), { recursive: true })
 
   // Write index.html for browsing
   const indexHtml = `<!DOCTYPE html>
@@ -295,6 +354,15 @@ async function main() {
 
   <h2>Metadata</h2>
   <p><a href="./metadata.json">metadata.json</a> - Full icon list and metadata</p>
+  <p><a href="./index.json">index.json</a> - Search index root (per-family files at <code>/{family}.json</code>)</p>
+
+  <h2>Attribution &amp; licensing</h2>
+  <p>These icons come from independent projects and each family keeps its own licence.
+  Several require attribution when redistributed.</p>
+  <ul>
+    <li><a href="./ATTRIBUTION.md">ATTRIBUTION.md</a> - per-family terms, and which ones require attribution</li>
+    <li><a href="./licenses/">licenses/</a> - the full licence text for every family</li>
+  </ul>
 
   <p style="margin-top: 2rem; color: #666; font-size: 0.9rem;">
     Generated: ${new Date().toISOString()}

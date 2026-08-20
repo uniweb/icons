@@ -62,19 +62,24 @@ These families are included in the npm package for local resolution:
 | [Heroicons](https://heroicons.com) v2 | `hi2` | 972 | MIT |
 | [Feather](https://feathericons.com) | `fi` | 287 | MIT |
 
-## CDN-Only Families
+## CDN Families
 
-These families are available via CDN but not included in the npm package (to reduce size):
+The CDN publishes **every family this package knows how to build except Typicons**
+— 30 families. The npm package still ships only the four above; the rest resolve
+over the CDN.
 
-| Family | Code | License | Notes |
-|--------|------|---------|-------|
-| [Phosphor](https://phosphoricons.com) | `pi` | MIT | Large set (9k+ icons) |
-| [Tabler](https://tabler-icons.io) | `tb` | MIT | Large set (5k+ icons) |
-| [Bootstrap](https://icons.getbootstrap.com) | `bs` | MIT | |
-| [Material Design](https://fonts.google.com/icons) | `md` | Apache-2.0 | |
-| [Ant Design](https://ant.design/components/icon) | `ai` | MIT | |
-| [Remix](https://remixicon.com) | `ri` | Apache-2.0 | |
-| [Simple Icons](https://simpleicons.org) | `si` | CC0-1.0 | Brand logos |
+Family lists go stale, so ask the corpus rather than this file:
+
+```bash
+curl -s https://uniweb.github.io/icons/metadata.json \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); f=d['families']; \
+      print(d['generatedAt'], d.get('corpus', {}).get('reactIcons', '?'), len(f), sorted(f))"
+```
+
+**Typicons (`ti`) is excluded deliberately.** It is the only CC BY-SA family here
+— share-alike, not merely attribution — and that obligation has not been
+answered. It is 336 icons, so excluding it costs little. Adding it back is a
+licensing decision, not a coverage one. See [ATTRIBUTION.md](ATTRIBUTION.md).
 
 ## CDN
 
@@ -85,6 +90,28 @@ https://uniweb.github.io/icons/{family}/{family}-{name}.svg
 ```
 
 Example: `lucide:home` → `https://uniweb.github.io/icons/lu/lu-home.svg`
+
+### Search index
+
+Alongside the SVGs the CDN publishes an index for building an icon picker —
+a root listing families and which of them contain a given term, plus one file
+per family:
+
+```
+https://uniweb.github.io/icons/index.json      families, licences, term → families
+https://uniweb.github.io/icons/{family}.json   { name: { react, file, terms } }
+```
+
+`file` is the corpus-relative path, so a consumer builds a URL as
+`{base}/{file}` without knowing the layout. Terms are **generated from the
+canonical names every build** — never hand-maintained — so the index cannot
+name an icon the corpus does not have.
+
+### Attribution
+
+`ATTRIBUTION.md` and `licenses/` are published with the corpus, at
+`/ATTRIBUTION.md` and `/licenses/`. Several families require attribution when
+redistributed; the table in `ATTRIBUTION.md` says which.
 
 ### Custom CDN
 
@@ -122,6 +149,18 @@ pnpm convert:all       # All families
 ```bash
 node scripts/build-cdn.js    # Build SVG files into cdn/
 ```
+
+### The `react-icons` pin
+
+`react-icons` is pinned to an **exact** version, not a range. The corpus is
+rebuilt whole on every publish, so the upstream version is part of what the
+corpus *is*: a name upstream retires disappears here on the next build, and
+every document referencing it breaks. A pin does not prevent that — it makes it
+a reviewed diff in a commit instead of an invisible change. Bump it deliberately
+and read the family counts in the build output.
+
+The version that produced a corpus is published with it, as
+`metadata.json`'s `corpus.reactIcons` and the search index root's.
 
 ### Releasing
 
