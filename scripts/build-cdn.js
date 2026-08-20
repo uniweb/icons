@@ -13,7 +13,7 @@
  *   node scripts/build-cdn.js lu hi        # Build specific families
  */
 
-import { writeFile, mkdir, readFile, copyFile, cp } from 'fs/promises'
+import { writeFile, mkdir, readFile, copyFile, cp, readdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -21,8 +21,10 @@ import { fileURLToPath } from 'url'
 // package's own resolver are its READERS. They share `iconPath` so the two
 // halves cannot drift — respelling `${family}-${name}.svg` here is how one
 // corpus acquires two incompatible spellings.
+import { createHash } from 'crypto'
 import { iconPath } from '@uniweb/core/icon-corpus'
 import { buildSearchIndex } from './lib/search-index.js'
+import { tarGz } from './lib/tar.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const CDN_DIR = join(__dirname, '../cdn')
@@ -37,54 +39,54 @@ const CDN_DIR = join(__dirname, '../cdn')
  */
 const FAMILIES = {
   // Core families (most popular, permissive licenses)
-  lu: { package: 'react-icons/lu', prefix: 'Lu', displayName: 'Lucide', license: 'ISC' },
-  hi: { package: 'react-icons/hi', prefix: 'Hi', displayName: 'Heroicons', license: 'MIT' },
-  hi2: { package: 'react-icons/hi2', prefix: 'Hi', displayName: 'Heroicons 2', license: 'MIT' },
-  fi: { package: 'react-icons/fi', prefix: 'Fi', displayName: 'Feather', license: 'MIT' },
+  lu: { package: 'react-icons/lu', prefix: 'Lu', displayName: 'Lucide', license: 'ISC', licenseFile: 'licenses/lucide.md' },
+  hi: { package: 'react-icons/hi', prefix: 'Hi', displayName: 'Heroicons', license: 'MIT', licenseFile: 'licenses/heroicons.md' },
+  hi2: { package: 'react-icons/hi2', prefix: 'Hi', displayName: 'Heroicons 2', license: 'MIT', licenseFile: 'licenses/heroicons.md' },
+  fi: { package: 'react-icons/fi', prefix: 'Fi', displayName: 'Feather', license: 'MIT', licenseFile: 'licenses/feather.md' },
 
   // Font Awesome (CC BY 4.0 for icons - attribution required)
-  fa: { package: 'react-icons/fa', prefix: 'Fa', displayName: 'Font Awesome 5', license: 'CC-BY-4.0' },
-  fa6: { package: 'react-icons/fa6', prefix: 'Fa', displayName: 'Font Awesome 6', license: 'CC-BY-4.0' },
+  fa: { package: 'react-icons/fa', prefix: 'Fa', displayName: 'Font Awesome 5', license: 'CC-BY-4.0', licenseFile: 'licenses/font-awesome.md' },
+  fa6: { package: 'react-icons/fa6', prefix: 'Fa', displayName: 'Font Awesome 6', license: 'CC-BY-4.0', licenseFile: 'licenses/font-awesome.md' },
 
   // Additional popular families
-  bs: { package: 'react-icons/bs', prefix: 'Bs', displayName: 'Bootstrap', license: 'MIT' },
-  md: { package: 'react-icons/md', prefix: 'Md', displayName: 'Material Design', license: 'Apache-2.0' },
-  ai: { package: 'react-icons/ai', prefix: 'Ai', displayName: 'Ant Design', license: 'MIT' },
-  ri: { package: 'react-icons/ri', prefix: 'Ri', displayName: 'Remix', license: 'Apache-2.0' },
-  si: { package: 'react-icons/si', prefix: 'Si', displayName: 'Simple Icons', license: 'CC0-1.0' },
-  io5: { package: 'react-icons/io5', prefix: 'Io', displayName: 'Ionicons 5', license: 'MIT' },
-  bi: { package: 'react-icons/bi', prefix: 'Bi', displayName: 'Boxicons', license: 'MIT' },
+  bs: { package: 'react-icons/bs', prefix: 'Bs', displayName: 'Bootstrap', license: 'MIT', licenseFile: 'licenses/bootstrap.md' },
+  md: { package: 'react-icons/md', prefix: 'Md', displayName: 'Material Design', license: 'Apache-2.0', licenseFile: 'licenses/material-design.md' },
+  ai: { package: 'react-icons/ai', prefix: 'Ai', displayName: 'Ant Design', license: 'MIT', licenseFile: 'licenses/ant-design.md' },
+  ri: { package: 'react-icons/ri', prefix: 'Ri', displayName: 'Remix', license: 'Apache-2.0', licenseFile: 'licenses/remix.md' },
+  si: { package: 'react-icons/si', prefix: 'Si', displayName: 'Simple Icons', license: 'CC0-1.0', licenseFile: 'licenses/simple-icons.md' },
+  io5: { package: 'react-icons/io5', prefix: 'Io', displayName: 'Ionicons 5', license: 'MIT', licenseFile: 'licenses/ionicons.md' },
+  bi: { package: 'react-icons/bi', prefix: 'Bi', displayName: 'Boxicons', license: 'MIT', licenseFile: 'licenses/boxicons.md' },
 
   // Large families (excluded from defaults due to size)
-  pi: { package: 'react-icons/pi', prefix: 'Pi', displayName: 'Phosphor', license: 'MIT' },
-  tb: { package: 'react-icons/tb', prefix: 'Tb', displayName: 'Tabler', license: 'MIT' },
-  gi: { package: 'react-icons/gi', prefix: 'Gi', displayName: 'Game Icons', license: 'CC-BY-3.0' },
+  pi: { package: 'react-icons/pi', prefix: 'Pi', displayName: 'Phosphor', license: 'MIT', licenseFile: 'licenses/phosphor.md' },
+  tb: { package: 'react-icons/tb', prefix: 'Tb', displayName: 'Tabler', license: 'MIT', licenseFile: 'licenses/tabler.md' },
+  gi: { package: 'react-icons/gi', prefix: 'Gi', displayName: 'Game Icons', license: 'CC-BY-3.0', licenseFile: 'licenses/game-icons.md' },
 
   // Specialized families
   // vsc and wi are NOT MIT — both were declared so until 2026-07-29, and both
   // require more than MIT does. Licences here are the upstream ones as listed
   // by react-icons' own README table; do not fill this column from memory.
-  vsc: { package: 'react-icons/vsc', prefix: 'Vsc', displayName: 'VS Code', license: 'CC-BY-4.0' },
-  wi: { package: 'react-icons/wi', prefix: 'Wi', displayName: 'Weather', license: 'OFL-1.1' },
+  vsc: { package: 'react-icons/vsc', prefix: 'Vsc', displayName: 'VS Code', license: 'CC-BY-4.0', licenseFile: 'licenses/vscode.md' },
+  wi: { package: 'react-icons/wi', prefix: 'Wi', displayName: 'Weather', license: 'OFL-1.1', licenseFile: 'licenses/weather.md' },
 
   // Remaining react-icons packs. Every `prefix` below was read off the real
   // exports rather than inferred from the family code — `im` and `lia` both
   // sort `Im500Px` / `Lia500Px` first, so a rule derived from the first export
   // name yields `Im500`/`Lia500` and matches exactly one icon. A wrong prefix
   // here does not error; it silently builds an empty family.
-  cg: { package: 'react-icons/cg', prefix: 'Cg', displayName: 'css.gg', license: 'MIT' },
-  ci: { package: 'react-icons/ci', prefix: 'Ci', displayName: 'Circum Icons', license: 'MPL-2.0' },
-  di: { package: 'react-icons/di', prefix: 'Di', displayName: 'Devicons', license: 'MIT' },
-  fc: { package: 'react-icons/fc', prefix: 'Fc', displayName: 'Flat Color Icons', license: 'MIT' },
-  go: { package: 'react-icons/go', prefix: 'Go', displayName: 'Github Octicons', license: 'MIT' },
-  gr: { package: 'react-icons/gr', prefix: 'Gr', displayName: 'Grommet Icons', license: 'Apache-2.0' },
-  im: { package: 'react-icons/im', prefix: 'Im', displayName: 'IcoMoon Free', license: 'CC-BY-4.0' },
-  io: { package: 'react-icons/io', prefix: 'Io', displayName: 'Ionicons 4', license: 'MIT' },
-  lia: { package: 'react-icons/lia', prefix: 'Lia', displayName: 'Line Awesome', license: 'MIT' },
-  rx: { package: 'react-icons/rx', prefix: 'Rx', displayName: 'Radix Icons', license: 'MIT' },
-  sl: { package: 'react-icons/sl', prefix: 'Sl', displayName: 'Simple Line Icons', license: 'MIT' },
-  tfi: { package: 'react-icons/tfi', prefix: 'Tfi', displayName: 'Themify Icons', license: 'MIT' },
-  ti: { package: 'react-icons/ti', prefix: 'Ti', displayName: 'Typicons', license: 'CC-BY-SA-3.0' }
+  cg: { package: 'react-icons/cg', prefix: 'Cg', displayName: 'css.gg', license: 'MIT', licenseFile: 'licenses/css-gg.md' },
+  ci: { package: 'react-icons/ci', prefix: 'Ci', displayName: 'Circum Icons', license: 'MPL-2.0', licenseFile: 'licenses/circum-icons.md' },
+  di: { package: 'react-icons/di', prefix: 'Di', displayName: 'Devicons', license: 'MIT', licenseFile: 'licenses/devicons.md' },
+  fc: { package: 'react-icons/fc', prefix: 'Fc', displayName: 'Flat Color Icons', license: 'MIT', licenseFile: 'licenses/flat-color-icons.md' },
+  go: { package: 'react-icons/go', prefix: 'Go', displayName: 'Github Octicons', license: 'MIT', licenseFile: 'licenses/octicons.md' },
+  gr: { package: 'react-icons/gr', prefix: 'Gr', displayName: 'Grommet Icons', license: 'Apache-2.0', licenseFile: 'licenses/grommet.md' },
+  im: { package: 'react-icons/im', prefix: 'Im', displayName: 'IcoMoon Free', license: 'CC-BY-4.0', licenseFile: 'licenses/icomoon-free.md' },
+  io: { package: 'react-icons/io', prefix: 'Io', displayName: 'Ionicons 4', license: 'MIT', licenseFile: 'licenses/ionicons4.md' },
+  lia: { package: 'react-icons/lia', prefix: 'Lia', displayName: 'Line Awesome', license: 'MIT', licenseFile: 'licenses/line-awesome.md' },
+  rx: { package: 'react-icons/rx', prefix: 'Rx', displayName: 'Radix Icons', license: 'MIT', licenseFile: 'licenses/radix.md' },
+  sl: { package: 'react-icons/sl', prefix: 'Sl', displayName: 'Simple Line Icons', license: 'MIT', licenseFile: 'licenses/simple-line-icons.md' },
+  tfi: { package: 'react-icons/tfi', prefix: 'Tfi', displayName: 'Themify Icons', license: 'MIT', licenseFile: 'licenses/themify.md' },
+  ti: { package: 'react-icons/ti', prefix: 'Ti', displayName: 'Typicons', license: 'CC-BY-SA-3.0', licenseFile: 'licenses/typicons.md' }
 }
 
 // Families published to the CDN — all of them.
@@ -166,6 +168,47 @@ function iconToSvg(IconComponent) {
   return `<svg xmlns="http://www.w3.org/2000/svg" ${attrs}>${renderChildren(children)}</svg>`
 }
 
+/**
+ * ⛔ The family → licence-file mapping is HAND-WRITTEN, so it is checked.
+ *
+ * `metadata.json` carries an SPDX id (9 distinct values) while the files are
+ * named by project (29 of them), so `lu` → `licenses/lucide.md` is derivable by
+ * nobody — a mirror could only crawl or guess, and guessing is precisely what
+ * the corpus's own filename rule forbids. Hosting found this (channel
+ * `hosting-framework-7795`): the doc said "mirror the whole tree" while the
+ * index could not express the tree.
+ *
+ * Enumerating it is the fix; asserting it is what keeps the fix true. A copy
+ * with no check drifts — two licence strings in this very file were wrong until
+ * `97f0ab6` — so this fails the build rather than publishing a dangling path or
+ * silently orphaning a licence nobody references.
+ */
+async function assertLicenseMapping() {
+  const declared = new Map()
+  for (const [code, cfg] of Object.entries(FAMILIES)) {
+    if (!cfg.licenseFile) throw new Error(`licence mapping: family "${code}" declares no licenseFile`)
+    declared.set(cfg.licenseFile, (declared.get(cfg.licenseFile) || []).concat(code))
+  }
+
+  const onDisk = new Set(
+    (await readdir(join(__dirname, '../licenses'))).filter((f) => f.endsWith('.md')).map((f) => `licenses/${f}`)
+  )
+
+  const dangling = [...declared.keys()].filter((f) => !onDisk.has(f))
+  if (dangling.length) throw new Error(`licence mapping: declared but missing on disk: ${dangling.join(', ')}`)
+
+  const orphaned = [...onDisk].filter((f) => !declared.has(f))
+  if (orphaned.length) {
+    throw new Error(
+      `licence mapping: present on disk but claimed by no family: ${orphaned.join(', ')}. ` +
+        `Every licence text must belong to a published family, or it is redistributed with nothing it covers.`
+    )
+  }
+
+  console.log(`Licence mapping: ${declared.size} files claimed by ${Object.keys(FAMILIES).length} families ✓`)
+  return declared
+}
+
 async function buildFamily(familyCode) {
   const config = FAMILIES[familyCode]
   if (!config) {
@@ -237,6 +280,9 @@ async function main() {
     familiesToBuild = DEFAULT_FAMILIES
   }
 
+  // Fail fast: a broken licence mapping should cost a second, not a full build.
+  await assertLicenseMapping()
+
   console.log('Building CDN icons for:', familiesToBuild.join(', '))
 
   // Create CDN directory
@@ -265,6 +311,22 @@ async function main() {
 
   for (const family of familiesToBuild) {
     const { success, failed, icons } = await buildFamily(family)
+
+    // ⛔ A requested family that yields nothing is fatal, not a warning.
+    //
+    // The corpus is republished WHOLE, so a family that fails to import does not
+    // arrive empty — it VANISHES, taking every name in it with it. Stored
+    // documents reference those names forever, so a silent import failure would
+    // break live content and read, to a mirror, as a deliberate removal.
+    // `buildFamily` already logs and continues on a bad import; that is right for
+    // one icon and wrong for a whole pack.
+    if (success === 0) {
+      throw new Error(
+        `family "${family}" produced 0 icons — refusing to publish a corpus that silently drops it. ` +
+          `Check that ${FAMILIES[family]?.package} imports and that the "${FAMILIES[family]?.prefix}" prefix is right.`
+      )
+    }
+
     totalSuccess += success
     totalFailed += failed
 
@@ -277,6 +339,10 @@ async function main() {
       metadata.families[family] = {
         displayName: FAMILIES[family].displayName,
         license: FAMILIES[family].license,
+        // The SPDX id says WHICH licence; this says WHERE ITS TEXT IS. They are
+        // not derivable from each other — 9 ids, 29 files — and a mirror needs
+        // the second to stock the files that carry the obligation.
+        licenseFile: FAMILIES[family].licenseFile,
         count: icons.length,
         // Bare names, unchanged. metadata.json is a PUBLIC URL with consumers
         // this repo cannot enumerate, so its shape is not ours to tidy; the
@@ -286,6 +352,60 @@ async function main() {
       }
     }
   }
+
+  // ── Attribution first: it belongs INSIDE the archives, being immutable bulk ──
+  await copyFile(join(__dirname, '../ATTRIBUTION.md'), join(CDN_DIR, 'ATTRIBUTION.md'))
+  await cp(join(__dirname, '../licenses'), join(CDN_DIR, 'licenses'), { recursive: true })
+
+  // ── Archives ────────────────────────────────────────────────────────────────
+  //
+  // Walking the tree is 51,003 requests. One archive is 1. Both shapes ship: the
+  // whole corpus for a cold stock, per-family for re-stocking only what moved.
+  //
+  // ⛔ They carry the IMMUTABLE BULK ONLY — SVGs, ATTRIBUTION.md, licenses/ —
+  // and never the JSON indexes. Two reasons and the second is the load-bearing
+  // one: metadata.json holds these archives' digests, so including it would be
+  // circular; and the indexes change every publish while the bulk almost never
+  // does, so an archive mixing them forces a consumer to re-fetch 18 MB to pick
+  // up a `generatedAt` change.
+  await mkdir(join(CDN_DIR, 'archives'), { recursive: true })
+
+  const readEntry = async (rel) => ({ path: rel, data: await readFile(join(CDN_DIR, rel)) })
+  const sha256 = (buf) => createHash('sha256').update(buf).digest('hex')
+
+  const licenseFiles = (await readdir(join(CDN_DIR, 'licenses'))).map((f) => `licenses/${f}`)
+  const attribution = ['ATTRIBUTION.md', ...licenseFiles]
+
+  const archives = {}
+  const bulkEntries = []
+
+  for (const family of familiesToBuild) {
+    if (!metadata.families[family]) continue
+    const entries = await Promise.all(
+      metadata.families[family].icons.map((name) => readEntry(iconPath(family, name)))
+    )
+    bulkEntries.push(...entries)
+    const gz = tarGz(entries)
+    await writeFile(join(CDN_DIR, 'archives', `${family}.tar.gz`), gz)
+    archives[`archives/${family}.tar.gz`] = { sha256: sha256(gz), bytes: gz.length, family }
+  }
+
+  const corpusGz = tarGz([...bulkEntries, ...(await Promise.all(attribution.map(readEntry)))])
+  await writeFile(join(CDN_DIR, 'archives', 'corpus.tar.gz'), corpusGz)
+  archives['archives/corpus.tar.gz'] = { sha256: sha256(corpusGz), bytes: corpusGz.length }
+
+  metadata.archives = archives
+  metadata.files = {
+    attribution,
+    indexes: ['metadata.json', 'index.json', 'digests.json',
+              ...familiesToBuild.filter((f) => metadata.families[f]).map((f) => `${f}.json`)],
+    archives: Object.keys(archives),
+    page: ['index.html']
+  }
+
+  console.log(
+    `Archives: corpus ${(corpusGz.length / 1048576).toFixed(1)} MB + ${familiesToBuild.length} per-family`
+  )
 
   // Write metadata
   await writeFile(
@@ -306,16 +426,6 @@ async function main() {
   }
   console.log(`Search index: ${Object.keys(root.terms).length} terms, ${perFamily.size} family files`)
 
-  // ⛔ Attribution travels WITH the corpus, not just with the repo.
-  //
-  // Several published families require attribution — `fa`/`fa6`/`vsc`/`im` are
-  // CC-BY-4.0, `gi` is CC-BY-3.0, `wi` is OFL-1.1, `ci` is MPL-2.0 — and until
-  // 2026-08-20 this script copied neither ATTRIBUTION.md nor licenses/ into the
-  // artifact. The analysis existed and was current; it simply was not served,
-  // so the corpus offered ~23k SVGs with nothing beside them. A licence file in
-  // a source repo is not attribution accompanying the bytes a CDN hands out.
-  await copyFile(join(__dirname, '../ATTRIBUTION.md'), join(CDN_DIR, 'ATTRIBUTION.md'))
-  await cp(join(__dirname, '../licenses'), join(CDN_DIR, 'licenses'), { recursive: true })
 
   // Write index.html for browsing
   const indexHtml = `<!DOCTYPE html>
@@ -368,10 +478,39 @@ async function main() {
 
   await writeFile(join(CDN_DIR, 'index.html'), indexHtml)
 
+  // ── digests.json — written LAST, because it covers everything else ──────────
+  //
+  // The audit instrument, not the stocking path: a mirror fetching archives
+  // verifies one digest from metadata.json and never needs this. What this
+  // answers is "is a mirror byte-correct?" after the fact, which nothing could
+  // answer before.
+  //
+  // ⛔ Its own file on purpose. 2.1 MB gzip has no business in metadata.json,
+  // which a picker fetches on cold open. And it covers every published file
+  // except itself — a file cannot contain its own digest.
+  const digests = {}
+  const digestWalk = async (dir, rel = '') => {
+    for (const entry of (await readdir(dir, { withFileTypes: true })).sort((a, b) => (a.name < b.name ? -1 : 1))) {
+      const abs = join(dir, entry.name)
+      const path = rel ? `${rel}/${entry.name}` : entry.name
+      if (entry.isDirectory()) await digestWalk(abs, path)
+      else if (path !== 'digests.json') digests[path] = sha256(await readFile(abs))
+    }
+  }
+  await digestWalk(CDN_DIR)
+  await writeFile(
+    join(CDN_DIR, 'digests.json'),
+    JSON.stringify({ generatedAt: metadata.generatedAt, algorithm: 'sha256', files: digests })
+  )
+  console.log(`Digests: ${Object.keys(digests).length} files`)
+
   console.log(`\nDone! Built ${totalSuccess} icons to cdn/`)
   if (totalFailed > 0) {
     console.log(`${totalFailed} icons failed.`)
   }
 }
 
-main().catch(console.error)
+main().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})

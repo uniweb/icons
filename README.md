@@ -106,6 +106,30 @@ https://uniweb.github.io/icons/{family}.json   { name: { react, file, terms } }
 canonical names every build** — never hand-maintained — so the index cannot
 name an icon the corpus does not have.
 
+### Bulk download
+
+Walking the tree is 51,003 requests. Don't:
+
+```
+https://uniweb.github.io/icons/archives/corpus.tar.gz     everything immutable, 11.6 MB
+https://uniweb.github.io/icons/archives/{family}.tar.gz   one family
+```
+
+Archives carry the SVGs, `ATTRIBUTION.md` and `licenses/` — **not** the JSON
+indexes, which change every publish and are fetched separately. They are written
+by a deterministic writer, so **an archive of unchanged content has an unchanged
+`sha256`**: you can use the digest to decide whether to re-download.
+
+### Verifying
+
+`metadata.json` carries a `sha256` for each archive. `digests.json` carries one
+per published file, for auditing a copy after the fact.
+
+`metadata.json` also enumerates every non-SVG path under `files`, and gives each
+family a `licenseFile` beside its SPDX id — `{ "license": "ISC", "licenseFile":
+"licenses/lucide.md" }`. The two are not derivable from each other, so anything
+redistributing the corpus should read the list rather than guess at names.
+
 ### Attribution
 
 `ATTRIBUTION.md` and `licenses/` are published with the corpus, at
