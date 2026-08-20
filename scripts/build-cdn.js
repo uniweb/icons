@@ -385,14 +385,20 @@ async function main() {
       metadata.families[family].icons.map((name) => readEntry(iconPath(family, name)))
     )
     bulkEntries.push(...entries)
-    const gz = tarGz(entries)
+    const { gz, sha256: gzSha, contentSha256 } = tarGz(entries)
     await writeFile(join(CDN_DIR, 'archives', `${family}.tar.gz`), gz)
-    archives[`archives/${family}.tar.gz`] = { sha256: sha256(gz), bytes: gz.length, family }
+    archives[`archives/${family}.tar.gz`] = { sha256: gzSha, contentSha256, bytes: gz.length, family }
   }
 
-  const corpusGz = tarGz([...bulkEntries, ...(await Promise.all(attribution.map(readEntry)))])
-  await writeFile(join(CDN_DIR, 'archives', 'corpus.tar.gz'), corpusGz)
-  archives['archives/corpus.tar.gz'] = { sha256: sha256(corpusGz), bytes: corpusGz.length }
+  const corpus = tarGz([...bulkEntries, ...(await Promise.all(attribution.map(readEntry)))])
+  await writeFile(join(CDN_DIR, 'archives', 'corpus.tar.gz'), corpus.gz)
+  archives['archives/corpus.tar.gz'] = {
+    sha256: corpus.sha256,
+    // ⛔ Trigger a re-stock on THIS, not on sha256: gzip differs across zlib
+    // builds, so the compressed digest moves when a CI runner upgrades Node.
+    contentSha256: corpus.contentSha256,
+    bytes: corpus.gz.length
+  }
 
   metadata.archives = archives
   metadata.files = {
@@ -404,7 +410,7 @@ async function main() {
   }
 
   console.log(
-    `Archives: corpus ${(corpusGz.length / 1048576).toFixed(1)} MB + ${familiesToBuild.length} per-family`
+    `Archives: corpus ${(corpus.gz.length / 1048576).toFixed(1)} MB + ${familiesToBuild.length} per-family`
   )
 
   // Write metadata

@@ -24,6 +24,7 @@
  * mode, and `gzip` with its own mtime zeroed.
  */
 import { gzipSync, constants } from 'zlib'
+import { createHash } from 'crypto'
 
 const BLOCK = 512
 
@@ -59,8 +60,26 @@ function header(path, size) {
 /**
  * Build a gzipped tar from an explicit, ordered list of entries.
  *
+ * Returns TWO digests, and the distinction is the whole point:
+ *
+ * - `sha256` — of the **.tar.gz as transferred**. Verify a download against it.
+ * - `contentSha256` — of the **uncompressed tar**. Compare against it to decide
+ *   whether to download at all.
+ *
+ * ⛔ **They are not interchangeable, because gzip is not reproducible across
+ * zlib builds.** Measured 2026-08-20: the CI runner (Node 20) and a developer
+ * machine (Node 22) produced byte-identical tars — `f3560acf…` both — and
+ * different `.tar.gz` bytes from them. Both archives are valid and extract to
+ * the same 50,969 files.
+ *
+ * So a digest over the compressed form answers *"did I get the bytes I was
+ * promised?"* but NOT *"has the corpus changed?"* — a runner's Node upgrade
+ * would move it with no content change and cost a consumer a needless full
+ * re-fetch. The uncompressed digest answers the second question exactly, and is
+ * stable across platforms, zlib versions and compression levels.
+ *
  * @param {Array<{path: string, data: Buffer}>} entries
- * @returns {Buffer} the .tar.gz
+ * @returns {{gz: Buffer, sha256: string, contentSha256: string}}
  */
 export function tarGz(entries) {
   const chunks = []
@@ -70,6 +89,15 @@ export function tarGz(entries) {
     if (remainder) chunks.push(Buffer.alloc(BLOCK - remainder))
   }
   chunks.push(Buffer.alloc(BLOCK * 2)) // two zero blocks terminate the archive
-  // `mtime: 0` keeps gzip's own header timestamp out of the digest.
-  return gzipSync(Buffer.concat(chunks), { level: constants.Z_BEST_COMPRESSION, mtime: 0 })
+
+  const tar = Buffer.concat(chunks)
+  // `mtime: 0` keeps gzip's own header timestamp out of the digest. It does not
+  // make gzip reproducible across zlib builds — see the note above.
+  const gz = gzipSync(tar, { level: constants.Z_BEST_COMPRESSION, mtime: 0 })
+
+  return {
+    gz,
+    sha256: createHash('sha256').update(gz).digest('hex'),
+    contentSha256: createHash('sha256').update(tar).digest('hex')
+  }
 }

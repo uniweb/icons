@@ -117,8 +117,11 @@ https://uniweb.github.io/icons/archives/{family}.tar.gz   one family
 
 Archives carry the SVGs, `ATTRIBUTION.md` and `licenses/` — **not** the JSON
 indexes, which change every publish and are fetched separately. They are written
-by a deterministic writer, so **an archive of unchanged content has an unchanged
-`sha256`**: you can use the digest to decide whether to re-download.
+by a deterministic writer. `metadata.json` publishes two digests per archive:
+`sha256` of the `.tar.gz` as transferred (verify a download), and
+`contentSha256` of the uncompressed tar (decide whether to download). Use the
+second to detect change — gzip output varies across zlib versions, so the first
+can move without the content moving.
 
 ### Verifying
 
