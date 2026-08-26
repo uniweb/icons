@@ -420,7 +420,7 @@ async function main() {
   )
 
   // Search index — root + one file per family, per
-  // `collab/context/icon-search-index-shape.md`.
+  // the shape the frontend lane specified, 2026-08-20.
   const { root, perFamily } = buildSearchIndex({
     families: indexFamilies,
     generatedAt: metadata.generatedAt,

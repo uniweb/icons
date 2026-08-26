@@ -1,8 +1,7 @@
 /**
  * The search index — what a picker needs, derived from the corpus it ships with.
  *
- * Specified by frontend in `collab/context/icon-search-index-shape.md` (channel
- * `frontend-framework-f072`); this module is the producer half. The split is
+ * Specified by the frontend lane, 2026-08-20; this module is the producer half. The split is
  * deliberate: they own what a query must answer, we own how terms are derived,
  * and the artifact ships from here because this is where the names are minted.
  *
