@@ -175,7 +175,7 @@ function iconToSvg(IconComponent) {
  * named by project (29 of them), so `lu` → `licenses/lucide.md` is derivable by
  * nobody — a mirror could only crawl or guess, and guessing is precisely what
  * the corpus's own filename rule forbids. Hosting found this (channel
- * `hosting-framework-7795`): the doc said "mirror the whole tree" while the
+ * hosting↔framework): the doc said "mirror the whole tree" while the
  * index could not express the tree.
  *
  * Enumerating it is the fix; asserting it is what keeps the fix true. A copy
