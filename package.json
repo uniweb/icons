@@ -16,7 +16,7 @@
     "convert:all": "node scripts/convert.js --all"
   },
   "dependencies": {
-    "@uniweb/core": "workspace:^"
+    "@uniweb/core": "workspace:~"
   },
   "devDependencies": {
     "react-icons": "5.7.0"
