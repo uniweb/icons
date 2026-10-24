@@ -90,6 +90,11 @@ https://uniweb.github.io/icons/{family}/{family}-{name}.svg
 
 Example: `lucide:home` → `https://uniweb.github.io/icons/lu/lu-home.svg`
 
+Names follow react-icons' component names in kebab case: `LuBuilding2` → `building2`,
+`LuGrid2X2` → `grid2-x2`. For `lu`, `hi`, `hi2` and `fi`, a reader also accepts the family's
+own spelling (`building-2`, `grid-2x2`) and maps it to the corpus's (`corpusIconName` in
+`@uniweb/core/icon-corpus`). The corpus holds one file per icon.
+
 ### Search index
 
 Alongside the SVGs the CDN publishes an index for building an icon picker —

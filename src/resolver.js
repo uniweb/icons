@@ -10,7 +10,7 @@
  * Don't respell either here; a writer and its readers with separate copies is
  * how one corpus ends up with two incompatible spellings.
  */
-import { DEFAULT_ICON_BASE, iconUrl } from '@uniweb/core/icon-corpus'
+import { DEFAULT_ICON_BASE, corpusIconName, iconUrl } from '@uniweb/core/icon-corpus'
 
 /**
  * Map friendly family names to react-icons codes
@@ -94,7 +94,9 @@ export function createLocalResolver(options = {}) {
       try {
         // Dynamic import from families directory
         // Icon files export default SVG string
-        const module = await import(`./families/${familyCode}/${name}.js`)
+        // The module is named as the corpus spells the icon, so a family's own spelling
+        // (`building-2`) finds the same file the CDN serves (`corpusIconName`).
+        const module = await import(`./families/${familyCode}/${corpusIconName(familyCode, name)}.js`)
         const svg = module.default
         if (svg) {
           cache.set(key, svg)
