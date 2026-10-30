@@ -151,7 +151,7 @@ To use a different CDN:
 ```yaml
 # site.yml
 icons:
-  cdnUrl: https://your-cdn.com/icons
+  base: https://your-cdn.com/icons
 ```
 
 ## Licensing
