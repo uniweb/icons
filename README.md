@@ -234,4 +234,4 @@ unpublished until one is cut.
 
 ## License
 
-This package's code is MIT licensed. Icon assets retain their original licenses (see above).
+This package's code is licensed under Apache-2.0. Icon assets retain their original licenses (see above).
